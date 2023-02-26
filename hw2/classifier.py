@@ -2,33 +2,59 @@ from nltk.lm.preprocessing import pad_both_ends, flatten, padded_everygram_pipel
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 import nltk
+from nltk.lm import MLE
 import sys, string
 
 words = ['a b c','b','c','d','e','f','g']
 
-nltk.download('stopwords')
 
 def data_preprocessing(authorlist):
     f = open(authorlist, "r")
     file_names = f.readlines()
     clean_words = {}
     for name in file_names:
-        individual_words = []
+        sentences = []
         ftemp = open(name[:-1], 'r', encoding='utf-8')
         temp_lines = ftemp.readlines()
+        real_lines = ""
         for line in temp_lines:
-            individual_words = individual_words + line.split()
-        # Three lines below are from https://machinelearningmastery.com/clean-text-machine-learning-python/
-        # The lines filter out punctuation, make the string lowercase, then remove all non alphanumeric characters
+            real_lines += line
+        sentences = real_lines.split('.')
+
         table = str.maketrans('', '', string.punctuation)
-        stripped = [w.translate(table) for w in individual_words]
-        lower = [w.lower() for w in stripped]
-        alpha = [w for w in lower if w.isalpha()]
-        # The following line will remove stopwords
-        sw = set(stopwords.words('english'))
-        clean = [w for w in alpha if not w in sw]
-        clean_words[name] = clean 
+        stripped = []
+        clean_sentences = []
+        # padded = []
+        for sentence in sentences[:-1]:
+            stripped = sentence.translate(table)
+            lower = stripped.lower()
+            individual_sentence = lower.split()
+            
+            clean_sentence = []
+            
+            sw = set(stopwords.words('english'))
+            for w in individual_sentence:
+                alpha = "" 
+                for l in w:
+                    if l.isalpha():
+                        alpha += l
+                if alpha not in sw and alpha != "":
+                    clean_sentence += [alpha]
+                
+            clean_sentences += [clean_sentence]
+        # padded = list(flatten(pad_both_ends(s, n=2) for s in clean_sentences))
+        train, vocab = padded_everygram_pipeline(2, clean_sentences)
         ftemp.close()
+        clean_words[name[:-1]] = (train, vocab)
     return clean_words
 
-print(data_preprocessing('authorlist.txt'))
+def train(name, model):
+    lm = MLE(2)
+    lm.fit(model[0], model[1])
+    print(lm.vocab)
+
+
+processed = data_preprocessing('authorlist.txt')
+for key, value in processed.items():
+    train(key, value)
+# print(processed)
