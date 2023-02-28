@@ -5,8 +5,6 @@ from nltk.lm import MLE
 
 import string
 
-# from nltk.tokenize import word_tokenize
-
 
 def data_preprocessing(authorlist):
     # Declare necessary variables 
