@@ -134,7 +134,7 @@ if len(sys.argv) == 2:
         if text[:-1] == 'dickens_utf8.txt':
             models[text[:-1]] = model_training(data_package[0], 2, 'a')
         elif text[:-1] == 'wilde_utf8.txt':
-            models[text[:-1]] = model_training(data_package[0], 2, 'k')
+            models[text[:-1]] = model_training(data_package[0], 2, 'a')
         else:
             models[text[:-1]] = model_training(data_package[0], 2, '~')
         dev_data[text[:-1]] = data_package[1]
